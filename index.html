@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Severed Loop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="vignette"></div>
+    <div class="crt-scanline"></div>
+    <canvas id="bloodCanvas"></canvas>
+
+    <div class="game-container">
+        <!-- TOP HUD -->
+        <header class="hud-header">
+            <div class="hud-brand">
+                <span class="game-title">THE SEVERED LOOP</span>
+                <span class="hud-tag">HUYẾT ẤN</span>
+            </div>
+
+            <div class="hud-stats-row">
+                <div class="hud-pill">
+                    <span class="lbl">STAGE</span>
+                    <span id="stageIndicator" class="val">1 / 3</span>
+                </div>
+                <div class="hud-pill">
+                    <span class="lbl">LƯỢT</span>
+                    <span id="turnCounter" class="val">01</span>
+                </div>
+                <div class="hud-pill calm-pill">
+                    <span class="lbl">CALM</span>
+                    <span id="calmCounter" class="val">3 / 3</span>
+                </div>
+                <div class="hud-pill seq-pill">
+                    <span class="lbl">NGHI THỨC</span>
+                    <div id="sequenceDisplay" class="seq-icons">
+                        <span class="seq-step" data-step="0">▲</span>
+                        <span class="seq-arr">→</span>
+                        <span class="seq-step" data-step="1">●</span>
+                        <span class="seq-arr">→</span>
+                        <span class="seq-step" data-step="2">■</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-actions">
+                <button id="btnMute" class="btn-sm">🔊 ÂM THANH</button>
+                <button id="btnRestart" class="btn-sm btn-danger">↺ RESET</button>
+            </div>
+        </header>
+
+        <!-- THREAT WARNING BANNER -->
+        <div id="threatBanner" class="threat-banner hidden">
+            <span class="threat-icon">⚠️</span>
+            <span id="threatText" class="threat-msg">QUÁI ĐANG KHÓA MỤC TIÊU VÀO THẺ BÀI!</span>
+        </div>
+
+        <!-- MAIN DESK: GRID + SIDEBAR -->
+        <main class="main-desk">
+            <!-- GRID SECTION -->
+            <section class="grid-section">
+                <div class="desk-bar">
+                    <span class="desk-title">BÀN CỜ LƯỚI</span>
+                    <span class="desk-tip">Chỉ lật ô kề 4 cạnh với ô an toàn</span>
+                </div>
+                <div class="board-wrapper">
+                    <div id="boardGrid" class="board-grid grid-4x4">
+                        <!-- Dynamic Grid Cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- SIDEBAR: LOG + STATEMENT -->
+            <aside class="sidebar-section">
+                <div class="panel-box statement-box">
+                    <div class="panel-head">MANH MỐI (DEMON BLUFF)</div>
+                    <div id="statementContent" class="statement-body">
+                        <span class="text-dim">Lật ô Lời Khai để đọc manh mối...</span>
+                    </div>
+                </div>
+
+                <div class="panel-box log-box">
+                    <div class="panel-head">NHẬT KÝ</div>
+                    <div id="eventLog" class="log-content">
+                        <div class="log-item sys">Khởi hành Stage 1. Lưới 4x4. Tìm chìa khóa.</div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- BOTTOM DASHBOARD: HAND + HAND CARDS -->
+        <footer class="bottom-dash">
+            <!-- HAND HP (SIGN OR DIE) -->
+            <div class="hand-panel">
+                <div class="panel-top-row">
+                    <span class="dash-title">BÀN TAY (10 HP)</span>
+                    <div class="hand-badges">
+                        <span id="nailCountBadge" class="badge-nail">MÓNG: 5/5</span>
+                        <span id="fingerCountBadge" class="badge-finger">NGÓN: 5/5</span>
+                    </div>
+                </div>
+
+                <div class="hand-row">
+                    <!-- VISUAL 5 FINGERS -->
+                    <div class="hand-visual" id="handContainer">
+                        <div class="finger" id="fingerPinky" data-finger="pinky">
+                            <div class="nail intact" id="nailPinky"></div>
+                            <div class="bone"></div>
+                            <span class="fn">Út</span>
+                        </div>
+                        <div class="finger" id="fingerRing" data-finger="ring">
+                            <div class="nail intact" id="nailRing"></div>
+                            <div class="bone"></div>
+                            <span class="fn">Áp</span>
+                        </div>
+                        <div class="finger" id="fingerMiddle" data-finger="middle">
+                            <div class="nail intact" id="nailMiddle"></div>
+                            <div class="bone"></div>
+                            <span class="fn">Giữa</span>
+                        </div>
+                        <div class="finger" id="fingerIndex" data-finger="index">
+                            <div class="nail intact" id="nailIndex"></div>
+                            <div class="bone"></div>
+                            <span class="fn">Trỏ</span>
+                        </div>
+                        <div class="finger" id="fingerThumb" data-finger="thumb">
+                            <div class="nail intact" id="nailThumb"></div>
+                            <div class="bone"></div>
+                            <span class="fn">Cái</span>
+                        </div>
+                    </div>
+
+                    <!-- SACRIFICE BUTTONS -->
+                    <div class="sacrifice-btn-col">
+                        <button id="btnRipNail" class="btn-sac sac-nail" title="Mất 1 Móng: Soi 1 ô bất kỳ an toàn">
+                            🩸 BẺ 1 MÓNG
+                            <small>Soi 1 ô bất kỳ</small>
+                        </button>
+                        <button id="btnShieldCard" class="btn-sac sac-finger"
+                            title="Mất 1 Ngón: Cứu thẻ đang bị quái ngắm">
+                            🔪 CHẶT NGÓN: CỨU THẺ
+                            <small>Hút đòn quái</small>
+                        </button>
+                        <button id="btnOverdrive" class="btn-sac sac-finger" title="Mất 1 Ngón: Hồi 3 Calm">
+                            ⚡ OVERDRIVE
+                            <small>Hồi đầy 3 Calm</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HAND CARDS (5 SKILL CARDS) -->
+            <div class="cards-panel">
+                <div class="panel-top-row">
+                    <span class="dash-title">THẺ BỔ TRỢ (1 CALM)</span>
+                    <span class="panel-sub">Nhấp để kích hoạt</span>
+                </div>
+                <div class="cards-grid" id="cardsList">
+                    <!-- Dynamic Skill Cards -->
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODAL POPUP -->
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h2 id="modalTitle" class="modal-title">THÔNG BÁO</h2>
+            <div id="modalContent" class="modal-content">Nội dung</div>
+            <div class="modal-actions">
+                <button id="modalBtnClose" class="btn-modal">XÁC NHẬN</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>
