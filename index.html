@@ -1,188 +1,199 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Severed Loop</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=JetBrains+Mono:wght@400;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>13 is Cursed, 9 is Blessed - The Clockface Séance</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=MedievalSharp&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
+<body class="day-phase">
+  <!-- Blood & Darkness Overlay Effects -->
+  <div id="vignette"></div>
+  <div id="blood-overlay"></div>
+  <div id="screen-shake-wrapper">
 
-<body>
-    <div class="vignette"></div>
-    <div class="crt-scanline"></div>
-    <canvas id="bloodCanvas"></canvas>
+    <!-- Header HUD -->
+    <header class="game-hud">
+      <div class="hud-left">
+        <h1 class="game-title">13 IS CURSED, 9 IS BLESSED</h1>
+        <span class="game-subtitle">The Clockface Séance</span>
+      </div>
 
-    <div class="game-container">
-        <!-- TOP HUD -->
-        <header class="hud-header">
-            <div class="hud-brand">
-                <span class="game-title">THE SEVERED LOOP</span>
-                <span class="hud-tag">HUYẾT ẤN</span>
-            </div>
-
-            <div class="hud-stats-row">
-                <div class="hud-pill">
-                    <span class="lbl">STAGE</span>
-                    <span id="stageIndicator" class="val">1 / 3</span>
-                </div>
-                <div class="hud-pill">
-                    <span class="lbl">LƯỢT</span>
-                    <span id="turnCounter" class="val">01</span>
-                </div>
-                <div class="hud-pill calm-pill">
-                    <span class="lbl">CALM</span>
-                    <span id="calmCounter" class="val">3 / 3</span>
-                </div>
-                <div class="hud-pill seq-pill">
-                    <span class="lbl">NGHI THỨC</span>
-                    <div id="sequenceDisplay" class="seq-icons">
-                        <span class="seq-step" data-step="0">▲</span>
-                        <span class="seq-arr">→</span>
-                        <span class="seq-step" data-step="1">●</span>
-                        <span class="seq-arr">→</span>
-                        <span class="seq-step" data-step="2">■</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="hud-actions">
-                <button id="btnMute" class="btn-sm">🔊 ÂM THANH</button>
-                <button id="btnRestart" class="btn-sm btn-danger">↺ RESET</button>
-            </div>
-        </header>
-
-        <!-- THREAT WARNING BANNER -->
-        <div id="threatBanner" class="threat-banner hidden">
-            <span class="threat-icon">⚠️</span>
-            <span id="threatText" class="threat-msg">QUÁI ĐANG KHÓA MỤC TIÊU VÀO THẺ BÀI!</span>
+      <div class="hud-center">
+        <div class="phase-badge" id="phase-badge">
+          <span class="phase-icon" id="phase-icon">☀️</span>
+          <span class="phase-text" id="phase-text">BAN NGÀY (DAY)</span>
         </div>
+        <div class="turn-tracker">
+          <span>LƯỢT:</span>
+          <strong id="turn-display">1 / 12</strong>
+          <span class="loop-tag">VÒNG LẶP <span id="loop-display">1</span></span>
+        </div>
+      </div>
 
-        <!-- MAIN DESK: GRID + SIDEBAR -->
-        <main class="main-desk">
-            <!-- GRID SECTION -->
-            <section class="grid-section">
-                <div class="desk-bar">
-                    <span class="desk-title">BÀN CỜ LƯỚI</span>
-                    <span class="desk-tip">Chỉ lật ô kề 4 cạnh với ô an toàn</span>
-                </div>
-                <div class="board-wrapper">
-                    <div id="boardGrid" class="board-grid grid-4x4">
-                        <!-- Dynamic Grid Cards -->
-                    </div>
-                </div>
-            </section>
+      <div class="hud-right">
+        <button id="btn-next-tick" class="action-btn primary-btn">
+          <span class="btn-icon">⏱️</span> NHÍCH KIM (LƯỢT KẾ)
+        </button>
+        <button id="btn-resolve-loop" class="action-btn danger-btn" title="Chốt sổ toàn bộ modifier ngay lập tức">
+          <span class="btn-icon">🩸</span> CHỐT SỔ (NỬA ĐÊM)
+        </button>
+        <button id="btn-help" class="action-btn icon-btn" title="Xem luật chơi">📜</button>
+      </div>
+    </header>
 
-            <!-- SIDEBAR: LOG + STATEMENT -->
-            <aside class="sidebar-section">
-                <div class="panel-box statement-box">
-                    <div class="panel-head">MANH MỐI (DEMON BLUFF)</div>
-                    <div id="statementContent" class="statement-body">
-                        <span class="text-dim">Lật ô Lời Khai để đọc manh mối...</span>
-                    </div>
-                </div>
+    <!-- Main Game Table -->
+    <main class="table-surface">
 
-                <div class="panel-box log-box">
-                    <div class="panel-head">NHẬT KÝ</div>
-                    <div id="eventLog" class="log-content">
-                        <div class="log-item sys">Khởi hành Stage 1. Lưới 4x4. Tìm chìa khóa.</div>
-                    </div>
-                </div>
-            </aside>
-        </main>
+      <!-- LEFT: The Sacrificial Hand (Bàn tay hiến tế) -->
+      <section class="hand-container" id="sacrificial-hand-area">
+        <div class="shackle-frame">
+          <div class="shackle-bar top-bar">
+            <span class="bolt"></span><span class="rivet-label">CÙM SẮT TAY TRÁI</span><span class="bolt"></span>
+          </div>
 
-        <!-- BOTTOM DASHBOARD: HAND + HAND CARDS -->
-        <footer class="bottom-dash">
-            <!-- HAND HP (SIGN OR DIE) -->
-            <div class="hand-panel">
-                <div class="panel-top-row">
-                    <span class="dash-title">BÀN TAY (10 HP)</span>
-                    <div class="hand-badges">
-                        <span id="nailCountBadge" class="badge-nail">MÓNG: 5/5</span>
-                        <span id="fingerCountBadge" class="badge-finger">NGÓN: 5/5</span>
-                    </div>
-                </div>
+          <!-- Guillotine blade mechanism -->
+          <div class="guillotine-housing">
+            <div class="blade" id="guillotine-blade"></div>
+          </div>
 
-                <div class="hand-row">
-                    <!-- VISUAL 5 FINGERS -->
-                    <div class="hand-visual" id="handContainer">
-                        <div class="finger" id="fingerPinky" data-finger="pinky">
-                            <div class="nail intact" id="nailPinky"></div>
-                            <div class="bone"></div>
-                            <span class="fn">Út</span>
-                        </div>
-                        <div class="finger" id="fingerRing" data-finger="ring">
-                            <div class="nail intact" id="nailRing"></div>
-                            <div class="bone"></div>
-                            <span class="fn">Áp</span>
-                        </div>
-                        <div class="finger" id="fingerMiddle" data-finger="middle">
-                            <div class="nail intact" id="nailMiddle"></div>
-                            <div class="bone"></div>
-                            <span class="fn">Giữa</span>
-                        </div>
-                        <div class="finger" id="fingerIndex" data-finger="index">
-                            <div class="nail intact" id="nailIndex"></div>
-                            <div class="bone"></div>
-                            <span class="fn">Trỏ</span>
-                        </div>
-                        <div class="finger" id="fingerThumb" data-finger="thumb">
-                            <div class="nail intact" id="nailThumb"></div>
-                            <div class="bone"></div>
-                            <span class="fn">Cái</span>
-                        </div>
-                    </div>
+          <!-- Hand Canvas / SVG representation -->
+          <div class="hand-diagram" id="hand-diagram">
+            <!-- Blood splatters on wood -->
+            <div class="blood-pool" id="hand-blood-pool"></div>
 
-                    <!-- SACRIFICE BUTTONS -->
-                    <div class="sacrifice-btn-col">
-                        <button id="btnRipNail" class="btn-sac sac-nail" title="Mất 1 Móng: Soi 1 ô bất kỳ an toàn">
-                            🩸 BẺ 1 MÓNG
-                            <small>Soi 1 ô bất kỳ</small>
-                        </button>
-                        <button id="btnShieldCard" class="btn-sac sac-finger"
-                            title="Mất 1 Ngón: Cứu thẻ đang bị quái ngắm">
-                            🔪 CHẶT NGÓN: CỨU THẺ
-                            <small>Hút đòn quái</small>
-                        </button>
-                        <button id="btnOverdrive" class="btn-sac sac-finger" title="Mất 1 Ngón: Hồi 3 Calm">
-                            ⚡ OVERDRIVE
-                            <small>Hồi đầy 3 Calm</small>
-                        </button>
-                    </div>
-                </div>
+            <svg viewBox="0 0 320 420" class="hand-svg" id="hand-svg">
+              <!-- Wrist Base -->
+              <path id="part-wrist" class="hand-part fleshy" d="M 90,320 L 90,400 Q 160,420 230,400 L 230,320 Z" />
+              <!-- Palm -->
+              <path id="part-palm" class="hand-part fleshy" d="M 80,210 Q 75,270 90,320 L 230,320 Q 245,260 235,210 Q 160,180 80,210 Z" />
+              
+              <!-- Thumb (Ngón cái - Máu 5) -->
+              <g id="finger-thumb" class="finger-group alive" data-name="Ngón Cái">
+                <path class="finger-flesh" d="M 80,215 Q 40,240 30,270 Q 25,295 50,305 Q 75,310 85,280 Z" />
+                <ellipse cx="40" cy="285" rx="7" ry="12" class="nail" transform="rotate(-30 40 285)" />
+                <text x="35" y="325" class="finger-label">CÁI</text>
+              </g>
+
+              <!-- Index (Ngón trỏ - Máu 4) -->
+              <g id="finger-index" class="finger-group alive" data-name="Ngón Trỏ">
+                <path class="finger-flesh" d="M 85,210 L 80,110 Q 80,85 102,85 Q 124,85 120,110 L 120,200 Z" />
+                <ellipse cx="101" cy="98" rx="8" ry="11" class="nail" />
+                <text x="101" y="70" class="finger-label" text-anchor="middle">TRỎ</text>
+              </g>
+
+              <!-- Middle (Ngón giữa - Máu 3) -->
+              <g id="finger-middle" class="finger-group alive" data-name="Ngón Giữa">
+                <path class="finger-flesh" d="M 124,195 L 125,75 Q 125,50 148,50 Q 170,50 168,75 L 165,195 Z" />
+                <ellipse cx="147" cy="65" rx="8" ry="12" class="nail" />
+                <text x="147" y="35" class="finger-label" text-anchor="middle">GIỮA</text>
+              </g>
+
+              <!-- Ring (Ngón áp út - Máu 2) -->
+              <g id="finger-ring" class="finger-group alive" data-name="Ngón Áp Út">
+                <path class="finger-flesh" d="M 169,200 L 172,100 Q 172,75 194,75 Q 214,75 210,100 L 204,205 Z" />
+                <ellipse cx="193" cy="89" rx="8" ry="11" class="nail" />
+                <text x="193" y="60" class="finger-label" text-anchor="middle">ÁP ÚT</text>
+              </g>
+
+              <!-- Pinky (Ngón út - Máu 1) -->
+              <g id="finger-pinky" class="finger-group alive" data-name="Ngón Út">
+                <path class="finger-flesh" d="M 207,215 L 216,140 Q 218,120 236,120 Q 252,120 248,140 L 235,230 Z" />
+                <ellipse cx="233" cy="132" rx="6" ry="9" class="nail" />
+                <text x="240" y="105" class="finger-label" text-anchor="middle">ÚT</text>
+              </g>
+
+              <!-- Chains & Padlocks -->
+              <rect x="70" y="330" width="180" height="28" rx="4" class="chain-brace" />
+              <circle cx="160" cy="344" r="9" class="chain-hole" />
+            </svg>
+          </div>
+
+          <div class="hand-status-panel">
+            <div class="hp-headline">
+              <span>SINH MỆNH:</span>
+              <strong id="hp-counter" class="hp-count">6 / 6</strong>
             </div>
-
-            <!-- HAND CARDS (5 SKILL CARDS) -->
-            <div class="cards-panel">
-                <div class="panel-top-row">
-                    <span class="dash-title">THẺ BỔ TRỢ (1 CALM)</span>
-                    <span class="panel-sub">Nhấp để kích hoạt</span>
-                </div>
-                <div class="cards-grid" id="cardsList">
-                    <!-- Dynamic Skill Cards -->
-                </div>
+            <div class="hp-bar-segments" id="hp-segments">
+              <span class="hp-pip alive" title="Ngón út"></span>
+              <span class="hp-pip alive" title="Ngón áp út"></span>
+              <span class="hp-pip alive" title="Ngón giữa"></span>
+              <span class="hp-pip alive" title="Ngón trỏ"></span>
+              <span class="hp-pip alive" title="Ngón cái"></span>
+              <span class="hp-pip alive special" title="Cổ tay"></span>
             </div>
-        </footer>
+            <div class="hand-log" id="hand-log">Cùm sắt siết lạnh. Hãy bảo toàn từng ngón tay.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: The 12-Hour Clockface (Bàn tròn 12 cung giờ) -->
+      <section class="clock-container" id="clockface-area">
+        <div class="clock-frame">
+          <!-- Ambient day/night rim -->
+          <div class="clock-dial-rim"></div>
+
+          <!-- Compass / Runes ornament -->
+          <div class="clock-runes">
+            <span class="rune-mark top">XII</span>
+            <span class="rune-mark right">III</span>
+            <span class="rune-mark bottom">VI</span>
+            <span class="rune-mark left">IX</span>
+          </div>
+
+          <!-- Center Needle (Kim đồng hồ) -->
+          <div class="clock-pivot" id="clock-pivot">
+            <div class="clock-hand" id="clock-hand">
+              <div class="hand-pointer"></div>
+              <div class="hand-ornament"></div>
+            </div>
+            <div class="pivot-cap">
+              <span class="pivot-symbol">⏳</span>
+            </div>
+          </div>
+
+          <!-- The 12 Card Slots placed dynamically via CSS/JS -->
+          <div class="slots-ring" id="slots-ring">
+            <!-- Rendered by game.js: slots 1 to 12 -->
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- BOTTOM: Player Hand Deck (Bài trên tay) -->
+    <footer class="deck-surface">
+      <div class="deck-header">
+        <div class="deck-title">
+          <span class="deck-icon">🎴</span> BÀI TRÊN TAY CỦA BẠN (<span id="hand-count">0</span> LÁ)
+        </div>
+        <div class="deck-hint">
+          Click chọn 1 lá bài ➔ click vào 1 Card Slot trên đồng hồ để kích hoạt hiệu ứng.
+        </div>
+      </div>
+      <div class="hand-card-list" id="player-hand-list">
+        <!-- Rendered by game.js -->
+      </div>
+    </footer>
+
+    <!-- MODAL: Win / Loss / Help Popups -->
+    <div class="modal-backdrop" id="modal-backdrop">
+      <div class="modal-box" id="modal-box">
+        <h2 class="modal-title" id="modal-title">LUẬT CHƠI</h2>
+        <div class="modal-content" id="modal-content">
+          <!-- Dynamic help or game over content -->
+        </div>
+        <div class="modal-footer">
+          <button class="action-btn primary-btn" id="modal-btn-confirm">ĐÃ HIỂU</button>
+        </div>
+      </div>
     </div>
 
-    <!-- MODAL POPUP -->
-    <div id="modalOverlay" class="modal-overlay hidden">
-        <div class="modal-card">
-            <h2 id="modalTitle" class="modal-title">THÔNG BÁO</h2>
-            <div id="modalContent" class="modal-content">Nội dung</div>
-            <div class="modal-actions">
-                <button id="modalBtnClose" class="btn-modal">XÁC NHẬN</button>
-            </div>
-        </div>
-    </div>
+  </div>
 
-    <script src="audio.js"></script>
-    <script src="game.js"></script>
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
 </body>
-
 </html>
